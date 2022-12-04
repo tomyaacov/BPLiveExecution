@@ -95,6 +95,7 @@ def boxes():
 @b_thread
 def box(i, j):
     global box_list, walls_list, target_list
+    first_time = True
     while True:
         neighbors_list = find_adjacent_boxes((i, j), walls_list) + \
                          find_adjacent_boxes((i, j), box_list)
@@ -102,7 +103,8 @@ def box(i, j):
         box_state = str(i) + "_" + str(j)
         box_in_target = (i, j) in target_list
         e = yield {block: double_object_movement, waitFor: All(), state: box_state,
-                   must_finish: not box_in_target}
+                   must_finish: (not box_in_target) and (not first_time)}
+        first_time = False
         new_player_location = event_to_new_location(e)
         if new_player_location == (i, j):
             new_box_location = event_to_2_steps_trajectory(e)

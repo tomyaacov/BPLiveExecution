@@ -24,7 +24,6 @@ results = pd.DataFrame(columns=["map",
                                 "qlearning success"])
 
 for i in maps:
-    if i > 0: break #debug!!!!!!
     map_settings["map"] = maps[i]
     pygame_settings["display"] = False
     dfs = DFSBProgram(init_bprogram)
