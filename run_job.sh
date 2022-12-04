@@ -3,7 +3,7 @@
 #SBATCH --partition main ### specify partition name where to run a job
 ##SBATCH --time 1-00:00:00 ### limit the time of job running. Format: D-H:MM:SS
 #SBATCH --job-name sokoban ### name of the job. replace my_job with your desired job name
-#SBATCH --output sokoban-id-3.out ### output log for running job - %J is the job number variable
+#SBATCH --output sokoban.out ### output log for running job - %J is the job number variable
 #SBATCH --mail-user=tomya@post.bgu.ac.il ### users email for sending job status notifications replace with yours
 #SBATCH --mail-type=BEGIN,END,FAIL ### conditions when to send the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
 #SBATCH --mem=64G ### total amount of RAM
@@ -12,5 +12,5 @@
 
 ### Start you code below ####
 module load anaconda ### load anaconda module
-conda activate BPLiveExecution
-python ~/repos/BPLiveExecution/main_sokoban.py
+source activate BPLiveExecution
+~/.conda/envs/BPLiveExecution/bin/python ~/repos/BPLiveExecution/main_sokoban.py
