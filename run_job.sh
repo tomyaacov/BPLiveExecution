@@ -12,5 +12,5 @@
 
 ### Start you code below ####
 module load anaconda ### load anaconda module
-source activate BPLiveExecution
+conda activate BPLiveExecution
 python ~/repos/BPLiveExecution/main_sokoban.py
