@@ -14,5 +14,5 @@ class DFSNode:
         return hash(self.__key())
 
     def __eq__(self, other):
-        return isinstance(other, DFSNode) and self.__key() == other.__key()
+        return self.__key() == other.__key()
 

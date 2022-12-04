@@ -27,6 +27,7 @@ class SpotSolver:
         spot.set_state_players(game, [True] * len(states))
 
         spot.solve_game(game)
+
         state_liveness = {}
         for i, b in enumerate(spot.get_state_winners(game)):
             state_liveness[i] = b
