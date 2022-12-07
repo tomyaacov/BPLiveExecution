@@ -17,11 +17,10 @@ class DFSBProgram:
 
     @timer
     def run(self):
-        id_counter = 0
+        total_events = set()
         bprogram = self.bprogram_gen()
         bprogram.setup()
-        init_s = DFSNode(tuple(), "_".join([str(x.get('state', 'D')) for x in bprogram.tickets]), id_counter)
-        id_counter += 1
+        init_s = DFSNode(tuple(), "_".join([str(x.get('state', 'D')) for x in bprogram.tickets]))
         init_s.must_finish = [x.get('must_finish', False) for x in bprogram.tickets] # initial must finish must be false
         visited = {}
         # Create a stack for DFS
@@ -38,7 +37,7 @@ class DFSBProgram:
             # if it is not visited.
             if not visited.get(s):
                 #print(s.id)
-                visited[s] = s.spot_id
+                visited[s] = True
 
             # Get all adjacent vertices of the popped vertex s
             # If a adjacent has not been visited, then push it
@@ -46,20 +45,21 @@ class DFSBProgram:
             bprogram = self.get_bprogram(s)
             events = bprogram.event_selection_strategy.selectable_events(bprogram.tickets)
             for event in events:
+                total_events.add(event)
                 bprogram = self.get_bprogram(s)
                 bprogram.advance_bthreads(event)
-                optional_new_s = DFSNode(s.prefix + (event,), "_".join([str(x.get('state', 'D')) for x in bprogram.tickets]), id_counter)
-                if optional_new_s in visited:
-                    new_s = DFSNode(s.prefix + (event,), "_".join([str(x.get('state', 'D')) for x in bprogram.tickets]), visited[optional_new_s])
-                else:
-                    new_s = optional_new_s
-                    id_counter += 1
+                new_s = DFSNode(s.prefix + (event,), "_".join([str(x.get('state', 'D')) for x in bprogram.tickets]))
                 new_s.must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
                 s.transitions[event] = new_s
                 s.rewards[event] = DFSBProgram.reward(s, new_s)
                 if not visited.get(new_s):
                     stack.append(new_s)
-        return init_s, visited
+        visited = dict([(k, i) for i,(k,_) in enumerate(visited.items())])
+        s_to_change = [k for k,v in visited.items() if v == 0][0]
+        number_to_change = visited[init_s]
+        visited[init_s] = 0
+        visited[s_to_change] = number_to_change
+        return init_s, visited, total_events
 
     @staticmethod
     def save_graph(init, states, name):

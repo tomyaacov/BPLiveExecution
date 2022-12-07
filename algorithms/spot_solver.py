@@ -1,6 +1,6 @@
 from bp.spot_ess import SpotESS
 import spot
-from buddy import bddtrue
+import buddy
 from utils import timer
 
 spot.setup()
@@ -9,22 +9,28 @@ class SpotSolver:
 
     @staticmethod
     @timer
-    def compute_ess(states_dict):
+    def compute_ess(states_dict, events):
         states = list(states_dict)
         bdict = spot.make_bdd_dict()
         game = spot.make_twa_graph(bdict)
+        dict_bdd = {}
+        for e in events:
+            dict_bdd[e.name] = buddy.bdd_ithvar(game.register_ap(e.name))
+
         game.new_states(len(states_dict))
         for s1, id1 in states_dict.items():
             for e, s2 in s1.transitions.items():
-                if any(s2.must_finish):
-                    game.new_edge(id1, states_dict[s2], bddtrue)
+                if any(s1.must_finish):
+                    game.new_edge(id1, states_dict[s2], dict_bdd[e.name])
                 else:
-                    game.new_edge(id1, states_dict[s2], bddtrue, [0])
+                    game.new_edge(id1, states_dict[s2], dict_bdd[e.name], [0])
 
         game.set_init_state(0)
         game.set_buchi()
         game.prop_state_acc(True)
         spot.set_state_players(game, [True] * len(states))
+
+
 
         spot.solve_game(game)
 

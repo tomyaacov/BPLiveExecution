@@ -38,19 +38,19 @@ def init_bprogram():
                     event_selection_strategy=SimpleEventSelectionStrategy(),
                     listener=PrintBProgramRunnerListener())
 
-
-if __name__ == "__main__":
-    dfs = DFSBProgram(init_bprogram)
-    init, states = dfs.run()
-    print(len(states))
-    DFSBProgram.save_graph(init, states, "graph.dot")
-    # Q = q_value_iteration(states, 1, 0.01)
-    # print("Q values:")
-    # for s in Q:
-    #     print(s)
-    #     for a in Q[s]:
-    #         print(a.name, ":", Q[s][a], end=", ")
-    #     print("")
-    # env = BPEnv()
-    # env.set_bprogram_generator(init_bprogram)
-    # Q_test(env, Q, 100, 4, 100, optimal=True)
+#
+# if __name__ == "__main__":
+#     dfs = DFSBProgram(init_bprogram)
+#     init, states = dfs.run()
+#     print(len(states))
+#     DFSBProgram.save_graph(init, states, "graph.dot")
+#     # Q = q_value_iteration(states, 1, 0.01)
+#     # print("Q values:")
+#     # for s in Q:
+#     #     print(s)
+#     #     for a in Q[s]:
+#     #         print(a.name, ":", Q[s][a], end=", ")
+#     #     print("")
+#     # env = BPEnv()
+#     # env.set_bprogram_generator(init_bprogram)
+#     # Q_test(env, Q, 100, 4, 100, optimal=True)

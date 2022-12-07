@@ -2,8 +2,9 @@
 maps = {
     0: [
     "XXXXXXXX",
-    "Xa b t X",
+    "Xa bt  X",
     "XXXXXXXX"
+
     ],
     1 : [
     "XXXXXXXX",

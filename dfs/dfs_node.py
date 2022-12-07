@@ -1,8 +1,7 @@
 class DFSNode:
-    def __init__(self, prefix, _id, spot_id):
+    def __init__(self, prefix, _id):
         self.id = _id
         self.prefix = prefix
-        self.spot_id = spot_id
         self.transitions = {}
         self.must_finish = None
         self.rewards = {}

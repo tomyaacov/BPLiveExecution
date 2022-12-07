@@ -22,7 +22,7 @@ class SpotESS(SimpleEventSelectionStrategy):
         selectable_events = self.remove_dead_states(selectable_events)
         if selectable_events:
             selected_event, next_state = random.choice(tuple(selectable_events))
-            self.current_state = self.states_dict_flip[next_state.spot_id]
+            self.current_state = self.states_dict_flip[self.states_dict[next_state]]
             return selected_event
         else:
             self.reset_to_initial()
