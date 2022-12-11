@@ -25,12 +25,13 @@ results = pd.DataFrame(columns=["map",
                                 ])
 
 for i in maps:
+    if i > 2: break # debug
     map_settings["map"] = maps[i]
     pygame_settings["display"] = False
     dfs = DFSBProgram(init_bprogram)
     (init, states_dict, events), dfs_time = dfs.run()
     states = list(states_dict)
-    graph = DFSBProgram.save_graph(init, states, "output/graph_sokoban_" + str(i) + ".dot")
+    graph = DFSBProgram.save_graph(init, states, "output/_graph_sokoban_" + str(i) + ".dot")
 
     spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events)
     spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
@@ -63,4 +64,4 @@ for i in maps:
                               # "qlearning success": qlearning_success_rate
                               },
                              ignore_index=True)
-results.to_csv("output/sokoban_results.csv", index=False)
+results.to_csv("output/_sokoban_results.csv", index=False)

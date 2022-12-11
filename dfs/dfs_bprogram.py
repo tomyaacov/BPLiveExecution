@@ -69,7 +69,7 @@ class DFSBProgram:
         for s in states:
             for e, s_new in s.transitions.items():
                 g.edge(s.id, s_new.id, label=e.name)
-        g.render(name)
+        g.save(name)
         return g
 
     @staticmethod
