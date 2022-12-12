@@ -25,6 +25,7 @@ results = pd.DataFrame(columns=["map",
                                 ])
 
 for i in maps:
+    if i > 2: break
     map_settings["map"] = maps[i]
     pygame_settings["display"] = False
     dfs = DFSBProgram(init_bprogram)
@@ -36,7 +37,7 @@ for i in maps:
     spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
 
 
-    value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 1, 0.001)
+    value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 0.99, 0.01)
     value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
                                                            eval_run_max_length)
 

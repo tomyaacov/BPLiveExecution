@@ -7,7 +7,7 @@ from bp.bp_env import BPEnv
 import pandas as pd
 
 
-n_sizes = [5, 10, 15, 20, 25, 30, 35, 40, 50][:4]
+n_sizes = [5, 10, 15, 20, 25, 30, 35, 40, 50]
 num_episodes = [1_000, 5_000, 50_000, 100_000, 500_000, 1_000_000, 5_000_000, 10_000_000, 50_000_000][:4]
 episode_timeout = [x*3 for x in n_sizes][:4]
 eval_runs = 100
@@ -18,8 +18,9 @@ results = pd.DataFrame(columns=["N",
                                 "spot success",
                                 "value iteration time",
                                 "value iteration success",
-                                "qlearning time",
-                                "qlearning success"])
+                                # "qlearning time",
+                                # "qlearning success"
+                                ])
 
 for i, N in enumerate(n_sizes):
     params["n"] = N
@@ -31,20 +32,20 @@ for i, N in enumerate(n_sizes):
     spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events)
     spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
 
-    value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 1, 0.001)
+    value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 0.99, 0.01)
     value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
 
-    env = BPEnv()
-    env.set_bprogram_generator(init_bprogram)
-    (qlearning_ess, Q, q_results, episodes, mean_reward), qlearning_time = QLearning.compute_ess(env,
-                                                                                               num_episodes[i],
-                                                                                               0.1,
-                                                                                               0.99,
-                                                                                               False,
-                                                                                               5,
-                                                                                               glie_10,
-                                                                                               episode_timeout[i])
-    qlearning_success_rate = ValueIteration.evaluate(qlearning_ess, init_bprogram, eval_runs, eval_run_max_length)
+    # env = BPEnv()
+    # env.set_bprogram_generator(init_bprogram)
+    # (qlearning_ess, Q, q_results, episodes, mean_reward), qlearning_time = QLearning.compute_ess(env,
+    #                                                                                            num_episodes[i],
+    #                                                                                            0.1,
+    #                                                                                            0.99,
+    #                                                                                            False,
+    #                                                                                            5,
+    #                                                                                            glie_10,
+    #                                                                                            episode_timeout[i])
+    # qlearning_success_rate = ValueIteration.evaluate(qlearning_ess, init_bprogram, eval_runs, eval_run_max_length)
 
     results = results.append({"N": int(N),
                               "DFS time": dfs_time,
@@ -52,9 +53,10 @@ for i, N in enumerate(n_sizes):
                               "spot success": spot_success_rate,
                               "value iteration time": value_iteration_time,
                               "value iteration success": value_iteration_success_rate,
-                              "qlearning time": qlearning_time,
-                              "qlearning success": qlearning_success_rate},
+                              # "qlearning time": qlearning_time,
+                              # "qlearning success": qlearning_success_rate
+                              },
                              ignore_index=True)
 
 
-results.to_csv("output/hot_cold_results.csv", index=False)
+results.to_csv("output/_hot_cold_results.csv", index=False)
