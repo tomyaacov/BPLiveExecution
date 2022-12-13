@@ -28,6 +28,23 @@ class SpotESS(SimpleEventSelectionStrategy):
             self.reset_to_initial()
             return None
 
+    def get_selectable_events(self, statements):
+        selectable_events = self.selectable_events(statements)
+        selectable_events = self.remove_dead_states(selectable_events)
+        return [x[0] for x in selectable_events]
+
+    def advance(self, statements, e):
+        selectable_events = self.selectable_events(statements)
+        selectable_events = self.remove_dead_states(selectable_events)
+        if selectable_events:
+            for selected_event, next_state in selectable_events:
+                if e == selected_event:
+                    self.current_state = self.states_dict_flip[self.states_dict[next_state]]
+                    return selected_event
+            raise ValueError("Event is not selectable")
+        else:
+            raise ValueError("Event is not selectable")
+
     def reset_to_initial(self):
         self.current_state = self.states_dict_flip[0]
 

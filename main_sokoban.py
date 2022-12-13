@@ -6,15 +6,14 @@ from algorithms.value_iteration import ValueIteration
 from examples.sokoban_pygame.sokoban_maps import maps
 import sys
 
-eval_runs = 10
-eval_run_max_length = 10
-num_episodes = [1_000, 10_000, 10_000, 10_000]
-episode_timeout = [100, 100, 100, 100]
-
+eval_runs = 1000
+eval_run_max_length = 1000
 
 if len(sys.argv) > 1:
     i = int(sys.argv[1])
 else:
+    eval_runs = 10
+    eval_run_max_length = 10
     i = 0
 map_settings["map"] = maps[i]
 pygame_settings["display"] = False
@@ -22,17 +21,21 @@ dfs = DFSBProgram(init_bprogram)
 (init, states_dict, events, liveness_bthreads), dfs_time = dfs.run()
 states = list(states_dict)
 print("graph size:", len(states))
+print("graph edges:", sum([len(s.transitions) for s in states]))
 graph = DFSBProgram.save_graph(init, states, "output/graph_sokoban_" + str(i) + ".dot")
 
 spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthreads)
-spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
+#spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
 print("spot_time:", spot_time)
-print("spot_success_rate:", spot_success_rate)
+#print("spot_success_rate:", spot_success_rate)
 
 
 value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 0.99, 0.01, liveness_bthreads)
+value_iteration_ess.spot_ess = spot_ess
+value_iteration_ess.spot_ess.reset_to_initial()
 value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
                                                         eval_run_max_length)
+
 print("value_iteration_time:", value_iteration_time)
 print("value_iteration_success_rate:", value_iteration_success_rate)
 

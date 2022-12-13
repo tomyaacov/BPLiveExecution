@@ -65,9 +65,6 @@ class ValueIteration:
                 next_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
                 reward = [int(m1)-int(m2) for m1, m2 in zip(prev_must_finish, next_must_finish)]
                 s = "_".join([str(x.get('state', 'D')) for x in bprogram.tickets])
-            if not program_finished:
-                if any(next_must_finish):
-                    bad_runs += 1
             Q_ess.reset_to_initial()
         return (runs - bad_runs) / runs
 

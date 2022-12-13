@@ -2,11 +2,11 @@ from bppy import SimpleEventSelectionStrategy
 import random
 
 class QTableCompatibleESS(SimpleEventSelectionStrategy):
-    def __init__(self, Q, optimal=False) -> None:
+    def __init__(self, Q, spot_ess=None, noise=None) -> None:
         self.Q = Q
-        #self.optimal = optimal
+        self.spot_ess = spot_ess
+        self.noise = noise
         self.reward_sums = [0]*len(Q)
-
         super().__init__()
 
     def select(self, statements, r_t, s_t):
@@ -23,8 +23,13 @@ class QTableCompatibleESS(SimpleEventSelectionStrategy):
                 a_t = random.choice(selectable_events)
         else:
             a_t = random.choice(selectable_events)
-        return a_t
+        if a_t in self.spot_ess.get_selectable_events(statements):
+            self.spot_ess.advance(statements, a_t)
+            return a_t
+        else:
+            return None
 
     def reset_to_initial(self):
         self.reward_sums = [0]*len(self.Q)
+        self.spot_ess.reset_to_initial()
 
