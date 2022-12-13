@@ -2,6 +2,7 @@ from bp.spot_ess import SpotESS
 import spot
 import buddy
 from utils import timer
+from concurrent.futures import ThreadPoolExecutor
 
 spot.setup()
 
@@ -9,7 +10,16 @@ class SpotSolver:
 
     @staticmethod
     @timer
-    def compute_ess(states_dict, events):
+    def compute_ess(states_dict, events, liveness_bthreads):
+        num_of_bthreads = len(list(list(states_dict.keys())[0].rewards.values())[0])
+        with ThreadPoolExecutor(num_of_bthreads) as executor:
+            processes = [executor.submit(SpotSolver.solve_game_per_bthread, states_dict, events, i) if i in liveness_bthreads
+                         else executor.submit(SpotSolver.dummy_state_liveness, states_dict, i) for i in range(num_of_bthreads)]
+            state_liveness = dict([(i, p.result()) for i, p in enumerate(processes)])
+        return SpotESS(states_dict, state_liveness)
+
+    @staticmethod
+    def solve_game_per_bthread(states_dict, events, i):
         states = list(states_dict)
         bdict = spot.make_bdd_dict()
         game = spot.make_twa_graph(bdict)
@@ -30,14 +40,16 @@ class SpotSolver:
         game.prop_state_acc(True)
         spot.set_state_players(game, [True] * len(states))
 
-
-
         spot.solve_game(game)
 
         state_liveness = {}
         for i, b in enumerate(spot.get_state_winners(game)):
             state_liveness[i] = b
-        return SpotESS(states_dict, state_liveness)
+        return state_liveness
+    @staticmethod
+    def dummy_state_liveness(states_dict, i):
+        return dict([(i, True) for n, i in states_dict.items()])
+
 
     @staticmethod
     def evaluate(spot_ess: SpotESS, init_bprogram, runs, run_max_length):

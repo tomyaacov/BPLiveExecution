@@ -25,14 +25,14 @@ results = pd.DataFrame(columns=["N",
 for i, N in enumerate(n_sizes):
     params["n"] = N
     dfs = DFSBProgram(init_bprogram)
-    (init, states_dict, events), dfs_time = dfs.run()
+    (init, states_dict, events, liveness_bthreads), dfs_time = dfs.run()
     states = list(states_dict)
     graph = DFSBProgram.save_graph(init, states, "output/graph_hot_cold_" + str(i) + ".dot")
 
-    spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events)
+    spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthreads)
     spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
 
-    value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 0.99, 0.01)
+    value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 0.99, 0.01, liveness_bthreads)
     value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
 
     # env = BPEnv()

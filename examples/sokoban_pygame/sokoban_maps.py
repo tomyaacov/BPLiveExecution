@@ -1,12 +1,6 @@
 
 maps = {
-    0: [
-    "XXXXXXXX",
-    "Xa bt  X",
-    "XXXXXXXX"
-
-    ],
-    1 : [
+    0 : [
     "XXXXXXXX",
     "X   XXXX",
     "X   X  X",
@@ -16,7 +10,7 @@ maps = {
     "Xa XXXXX",
     "XXXXXXXX",
 ],
-    2:[
+    1:[
     "XXXXXXXX",
     "X     aX",
     "Xt  b  X",
@@ -26,7 +20,7 @@ maps = {
     "XXXXXXXX",
     "XXXXXXXX",
 ],
-    3: [
+    2: [
     "XXXXXXXX",
     "X XXX aX",
     "X t X  X",
