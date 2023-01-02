@@ -6,6 +6,9 @@ from algorithms.value_iteration import ValueIteration
 from examples.sokoban_pygame.sokoban_maps import maps
 import sys
 import pickle
+import sys
+print(sys.getrecursionlimit())
+sys.setrecursionlimit(10000)
 
 def save_obj(obj, file_name):
     with open(file_name, 'wb') as f:
