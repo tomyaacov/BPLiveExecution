@@ -6,7 +6,7 @@
 #SBATCH --output sokoban2.out ### output log for running job - %J is the job number variable
 #SBATCH --mail-user=tomya@post.bgu.ac.il ### users email for sending job status notifications replace with yours
 #SBATCH --mail-type=BEGIN,END,FAIL ### conditions when to send the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
-#SBATCH --mem=64G ### total amount of RAM
+#SBATCH --mem=128G ### total amount of RAM
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=6 ##. You may reduce that number to 6 and get double the RAM per thread
 
