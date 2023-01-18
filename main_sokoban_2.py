@@ -43,7 +43,7 @@ else:
 map_settings["map"] = maps[i]
 pygame_settings["display"] = False
 
-graphs = pydot.graph_from_dot_file("/Users/tomyaacov/Downloads/sokoban_cobp_2.dot")
+graphs = pydot.graph_from_dot_file("output/sokoban_cobp_" + str(i) + ".dot")
 graph = graphs[0]
 init, states_dict, events, liveness_bthreads = transform_graph(graph)
 
