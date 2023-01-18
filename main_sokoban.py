@@ -7,7 +7,6 @@ from examples.sokoban_pygame.sokoban_maps import maps
 import sys
 import pickle
 import sys
-print(sys.getrecursionlimit())
 sys.setrecursionlimit(10000)
 
 def save_obj(obj, file_name):
@@ -20,9 +19,9 @@ eval_run_max_length = 1000
 if len(sys.argv) > 1:
     i = int(sys.argv[1])
 else:
-    eval_runs = 5
-    eval_run_max_length = 1000
-    i = 1
+    eval_runs = 10
+    eval_run_max_length = 100
+    i = 0
 map_settings["map"] = maps[i]
 pygame_settings["display"] = False
 dfs = DFSBProgram(init_bprogram)
@@ -42,13 +41,13 @@ print("spot_time:", spot_time)
 save_obj(spot_ess, "output/spot_ess_" + str(i))
 
 
-value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 0.99, 0.01, liveness_bthreads)
+value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, 0.99, 0.01, liveness_bthreads, per_bthread=False)
+print("value_iteration_time:", value_iteration_time)
 value_iteration_ess.spot_ess = spot_ess
 value_iteration_ess.spot_ess.reset_to_initial()
 value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
                                                         eval_run_max_length)
 save_obj(value_iteration_ess, "output/value_iteration_ess_" + str(i))
-print("value_iteration_time:", value_iteration_time)
 print("value_iteration_success_rate:", value_iteration_success_rate)
 
 

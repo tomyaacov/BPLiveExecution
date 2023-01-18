@@ -2,7 +2,6 @@ from bp.spot_ess import SpotESS
 import spot
 import buddy
 from utils import timer
-from concurrent.futures import ThreadPoolExecutor
 
 spot.setup()
 
@@ -10,13 +9,49 @@ class SpotSolver:
 
     @staticmethod
     @timer
-    def compute_ess(states_dict, events, liveness_bthreads):
+    def compute_ess(states_dict, events, liveness_bthreads, per_bthread=True):
+        if not per_bthread:
+            state_liveness = {}
+            state_liveness[0] = SpotSolver.solve_game(states_dict, events)
+            return SpotESS(states_dict, state_liveness)
         num_of_bthreads = len(list(list(states_dict.keys())[0].rewards.values())[0])
-        with ThreadPoolExecutor(num_of_bthreads) as executor:
-            processes = [executor.submit(SpotSolver.solve_game_per_bthread, states_dict, events, i) if i in liveness_bthreads
-                         else executor.submit(SpotSolver.dummy_state_liveness, states_dict, i) for i in range(num_of_bthreads)]
-            state_liveness = dict([(i, p.result()) for i, p in enumerate(processes)])
+        state_liveness = {}
+        for i in range(num_of_bthreads):
+            if i in liveness_bthreads:
+                state_liveness[i] = SpotSolver.solve_game_per_bthread(states_dict, events, i)
+            else:
+                state_liveness[i] = SpotSolver.dummy_state_liveness(states_dict, i)
         return SpotESS(states_dict, state_liveness)
+
+    @staticmethod
+    def solve_game(states_dict, events):
+        states = list(states_dict)
+        bdict = spot.make_bdd_dict()
+        game = spot.make_twa_graph(bdict)
+        dict_bdd = {}
+        for e in events:
+            dict_bdd[e] = buddy.bdd_ithvar(game.register_ap(e))
+
+        game.new_states(len(states_dict))
+        for s1, id1 in states_dict.items():
+            for e, s2 in s1.transitions.items():
+                if any(s1.must_finish):
+                    game.new_edge(id1, states_dict[s2], dict_bdd[e])
+                else:
+                    game.new_edge(id1, states_dict[s2], dict_bdd[e], [0])
+
+        game.set_init_state(0)
+        game.set_buchi()
+        game.prop_state_acc(True)
+        spot.set_state_players(game, [True] * len(states))
+
+        _, t = SpotSolver.run_alg(game)
+        print(t)
+
+        state_liveness = {}
+        for i, b in enumerate(spot.get_state_winners(game)):
+            state_liveness[i] = b
+        return state_liveness
 
     @staticmethod
     def solve_game_per_bthread(states_dict, events, i):
@@ -30,7 +65,7 @@ class SpotSolver:
         game.new_states(len(states_dict))
         for s1, id1 in states_dict.items():
             for e, s2 in s1.transitions.items():
-                if any(s1.must_finish):
+                if s1.must_finish[i]:
                     game.new_edge(id1, states_dict[s2], dict_bdd[e.name])
                 else:
                     game.new_edge(id1, states_dict[s2], dict_bdd[e.name], [0])
@@ -72,5 +107,10 @@ class SpotSolver:
                     bad_runs += 1
             spot_ess.reset_to_initial()
         return (runs - bad_runs) / runs
+
+    @staticmethod
+    @timer
+    def run_alg(game):
+        spot.solve_game(game)
 
 

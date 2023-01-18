@@ -67,7 +67,8 @@ class DFSBProgram:
     def save_graph(init, states, name):
         g = graphviz.Digraph()
         for s in states:
-            g.node(s.id, shape='doublecircle' if s == init else 'circle', color="red" if any(s.must_finish) else "green")
+            #g.node(s.id, shape='doublecircle' if s == init else 'circle', color="red" if any(s.must_finish) else "green")
+            g.node(s.id, shape='doublecircle' if s == init else 'circle')
         for s in states:
             for e, s_new in s.transitions.items():
                 g.edge(s.id, s_new.id, label=e.name)

@@ -30,5 +30,15 @@ maps = {
     "XX     X",
     "XXXXXXXX",
     ]
+,
+    3: [
+    "XXXXXXX",
+    "Xt  baX",
+    "X  tb X",
+    "XXX X X",
+    "XXXXXXX",
+    "XXXXXXX",
+    "XXXXXXX",
+    ]
 }
 

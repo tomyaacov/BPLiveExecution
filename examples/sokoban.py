@@ -112,6 +112,13 @@ def box(i, j):
             box_list.append(new_box_location)
             i, j = new_box_location
 
+@b_thread
+def aux():
+    yield {waitFor: All(), state: "I"}
+    while True:
+        yield {waitFor: EventSet(lambda e: False), state: "S"}
+
+
 
 # @b_thread
 # def map_printer(map):
@@ -193,7 +200,7 @@ def init_bprogram():
     player_locations = find(map, "a") + find(map, "A")
     player_location = player_locations[0]
 
-    bthreads_list = [player(*player_location), wall()] + [box(*l) for l in box_list]
+    bthreads_list = [aux()] + [player(*player_location), wall()] + [box(*l) for l in box_list]
     return BProgram(bthreads=bthreads_list, event_selection_strategy=SimpleEventSelectionStrategy())
 
 

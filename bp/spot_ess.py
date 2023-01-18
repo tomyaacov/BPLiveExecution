@@ -12,9 +12,11 @@ class SpotESS(SimpleEventSelectionStrategy):
 
     def remove_dead_states(self, selectable_events):
         final_events = []
+        selectable_events = list(selectable_events)
+        selectable_events_names = [x.name for x in selectable_events]
         for e, next_s in self.current_state.transitions.items():
-            if e in selectable_events and all([sl[self.states_dict[next_s]] for i, sl in self.state_liveness.items()]):
-                final_events.append((e, next_s))
+            if e in selectable_events_names and all([sl[self.states_dict[next_s]] for i, sl in self.state_liveness.items()]):
+                final_events.append((selectable_events[selectable_events_names.index(e)], next_s))
         return final_events
 
     def select(self, statements):
