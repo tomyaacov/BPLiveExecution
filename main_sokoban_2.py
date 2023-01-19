@@ -52,7 +52,7 @@ else:
 map_settings["map"] = maps[i]
 pygame_settings["display"] = False
 
-with open("/Users/tomyaacov/university/BPjsLiveness/output/sokoban_cobp_" + str(i) + ".ser", "rb") as fd:
+with open("output/sokoban_cobp_" + str(i) + ".ser", "rb") as fd:
     jobj = fd.read()
     pobj = javaobj.loads(jobj)
     init, states_dict, events, liveness_bthreads = transform_dict(pobj)
