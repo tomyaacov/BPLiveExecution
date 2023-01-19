@@ -35,10 +35,10 @@ class ValueIteration:
 
         transitions = []
         for i in range(len(actions)):
-            transitions.append(csr_matrix((S, S)))
+            transitions.append(csr_matrix((S, S), dtype='uint8'))
         rewards = []
         for i in range(len(actions)):
-            rewards.append(csr_matrix((S, S)))
+            rewards.append(csr_matrix((S, S), dtype='uint8'))
 
         for k, v in states_dict_flipped.items():
             for evt_i, evt in enumerate(actions):

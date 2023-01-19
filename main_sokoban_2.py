@@ -3,32 +3,41 @@ from algorithms.spot_solver import SpotSolver
 from algorithms.value_iteration import ValueIteration
 from examples.sokoban_pygame.sokoban_maps import maps
 import sys
-import pydot
+import javaobj
 from dfs.dfs_node import DFSNode
 
-def transform_graph(g):
+def transform_dict(d):
     visited = {}
     nodes_map = {}
     total_events = set()
-    for s in g.get_nodes():
+    counter = 0
+    for s in d:
         try:
-            n = DFSNode(tuple(), s.get_id().strip('"'))
+            n = DFSNode(tuple(), str(s))
         except Exception:
-            print(s.get_name())
+            print(s)
             continue
-        must_finish_str = s.get_label("hot").strip('"').split(",")
+        must_finish_str = str(d[s]["H"]).split(",")
         must_finish_dict = dict([(must_finish_str[2*i], must_finish_str[2*i+1] == "1") for i in range(len(must_finish_str)//2)])
         n.must_finish = [must_finish_dict["box" + str(x)] for x in range(len(must_finish_dict))]
-        visited[n] = int(s.get_name())
-        nodes_map[s.get_name()] = n
-    for e in g.get_edge_list():
-        l = e.get_label().strip('"')
-        nodes_map[e.get_source()].transitions[l] = nodes_map[e.get_destination()]
-        nodes_map[e.get_source()].rewards[l] = int(not any(nodes_map[e.get_destination()].must_finish)) - \
-                                               int(not any(nodes_map[e.get_source()].must_finish))
-        total_events.add(l)
-
-    return nodes_map["0"], visited, total_events, None
+        visited[n] = counter
+        nodes_map[str(s)] = n
+        counter += 1
+    for s in d:
+        for e in d[s]:
+            if e == "H":
+                continue
+            l = str(e)
+            nodes_map[str(s)].transitions[l] = nodes_map[str(d[s][e])]
+            nodes_map[str(s)].rewards[l] = int(not any(nodes_map[str(d[s][e])].must_finish)) - \
+                                               int(not any(nodes_map[str(s)].must_finish))
+            total_events.add(l)
+    s_to_change = [k for k, v in visited.items() if v == 0][0]
+    init_s = [nodes_map[x] for x in nodes_map if x.startswith("I")][0]
+    number_to_change = visited[init_s]
+    visited[init_s] = 0
+    visited[s_to_change] = number_to_change
+    return init_s, visited, total_events, None
 
 
 eval_runs = 10
@@ -39,13 +48,14 @@ if len(sys.argv) > 1:
 else:
     eval_runs = 10
     eval_run_max_length = 100
-    i = 2
+    i = 1
 map_settings["map"] = maps[i]
 pygame_settings["display"] = False
 
-graphs = pydot.graph_from_dot_file("output/sokoban_cobp_" + str(i) + ".dot")
-graph = graphs[0]
-init, states_dict, events, liveness_bthreads = transform_graph(graph)
+with open("/Users/tomyaacov/university/BPjsLiveness/output/sokoban_cobp_" + str(i) + ".ser", "rb") as fd:
+    jobj = fd.read()
+    pobj = javaobj.loads(jobj)
+    init, states_dict, events, liveness_bthreads = transform_dict(pobj)
 
 states = list(states_dict)
 print("graph size:", len(states))
