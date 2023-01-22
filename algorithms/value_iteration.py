@@ -144,8 +144,8 @@ class ValueIteration:
             transitions[actions.index(evt)][S - 1, S - 1] = 1
             rewards[actions.index(evt)][S - 1, S - 1] = 0
 
-        #vi = mdptoolbox.mdp.ValueIteration(transitions, rewards, gamma, epsilon=convergence_threshold)
-        vi = mdptoolbox.mdp.QLearning(transitions, rewards, gamma, 5000000)
+        vi = mdptoolbox.mdp.ValueIteration(transitions, rewards, gamma, epsilon=convergence_threshold)
+        #vi = mdptoolbox.mdp.QLearning(transitions, rewards, gamma, 5000000)
         _, t = ValueIteration.run_alg(vi)
         Q = np.zeros((S, len(actions)))
         V = np.array(vi.V)

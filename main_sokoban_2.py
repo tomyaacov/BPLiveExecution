@@ -40,16 +40,24 @@ def transform_dict(d):
     return init_s, visited, total_events, None
 
 
-eval_runs = 10
-eval_run_max_length = 10
+eval_runs = 100
+eval_run_max_length = 1000
 
 if len(sys.argv) > 1:
-    i = int(sys.argv[1])
+    i = sys.argv[1]
 else:
     eval_runs = 10
     eval_run_max_length = 100
-    i = 0
-map_settings["map"] = maps[i]
+    i = "map_6_1"
+
+def format_map(file_name):
+    l = []
+    with open("examples/py_maps/" + file_name, "r") as f:
+        for line in f:
+            l.append(line.strip("\n"))
+    return l
+
+map_settings["map"] = format_map(i)
 pygame_settings["display"] = False
 
 with open("output/sokoban_cobp_" + str(i) + ".ser", "rb") as fd:
