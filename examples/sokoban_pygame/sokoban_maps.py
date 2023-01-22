@@ -16,8 +16,8 @@ maps = {
     "Xt  b  X",
     "X  tb  X",
     "XXX X  X",
-    "XXXXXXXX",
-    "XXXXXXXX",
+    "X      X",
+    "X      X",
     "XXXXXXXX",
 ],
     2: [

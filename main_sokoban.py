@@ -21,7 +21,7 @@ if len(sys.argv) > 1:
 else:
     eval_runs = 10
     eval_run_max_length = 100
-    i = 0
+    i = 1
 map_settings["map"] = maps[i]
 pygame_settings["display"] = False
 dfs = DFSBProgram(init_bprogram)
