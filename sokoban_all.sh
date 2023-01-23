@@ -13,9 +13,10 @@
 ### Start you code below ####
 module load anaconda ### load anaconda module
 source activate BPLiveExecution
-for i in $(seq 6 15); do
+for i in $(seq 10 15); do
 	for b in $(seq 1 2); do
 	  echo "map_${i}_${b}"
 		~/.conda/envs/BPLiveExecution/bin/python ~/repos/BPLiveExecution/main_sokoban_2.py "map_${i}_${b}"
 	done
 done
+
