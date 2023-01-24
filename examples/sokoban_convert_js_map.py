@@ -1,6 +1,6 @@
 import os
-DIR = "js_maps"
-OUT_DIR = "py_maps"
+DIR = "js_maps_new"
+OUT_DIR = "py_maps_new"
 maps = {}
 for file_name in os.listdir(DIR):
     l = []

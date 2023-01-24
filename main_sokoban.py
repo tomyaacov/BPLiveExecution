@@ -1,123 +1,99 @@
 from examples.sokoban import init_bprogram, map_settings, pygame_settings
-from dfs.dfs_bprogram import DFSBProgram
 from algorithms.spot_solver import SpotSolver
 from algorithms.value_iteration import ValueIteration
-
 from examples.sokoban_pygame.sokoban_maps import maps
 import sys
-import pickle
-import sys
-sys.setrecursionlimit(10000)
+import javaobj
+from dfs.dfs_node import DFSNode
 
-def save_obj(obj, file_name):
-    with open(file_name, 'wb') as f:
-        pickle.dump(obj, f)
+def transform_dict(d, per_bthread):
+    visited = {}
+    nodes_map = {}
+    total_events = set()
+    counter = 0
+    for s in d:
+        try:
+            n = DFSNode(tuple(), str(s))
+        except Exception:
+            print(s)
+            continue
+        must_finish_str = str(d[s]["H"]).split(",")
+        must_finish_dict = dict([(must_finish_str[2*i], must_finish_str[2*i+1] == "1") for i in range(len(must_finish_str)//2)])
+        n.must_finish = [must_finish_dict["box" + str(x)] for x in range(len(must_finish_dict))]
+        visited[n] = counter
+        nodes_map[str(s)] = n
+        counter += 1
+    for s in d:
+        for e in d[s]:
+            if e == "H":
+                continue
+            l = str(e)
+            nodes_map[str(s)].transitions[l] = nodes_map[str(d[s][e])]
+            if per_bthread:
+                nodes_map[str(s)].rewards[l] = sum([int(y)-int(x) for x,y in zip(nodes_map[str(d[s][e])].must_finish, nodes_map[str(s)].must_finish)])
+            else:
+                nodes_map[str(s)].rewards[l] = int(not any(nodes_map[str(d[s][e])].must_finish)) - \
+                                               int(not any(nodes_map[str(s)].must_finish))
+            total_events.add(l)
+    s_to_change = [k for k, v in visited.items() if v == 0][0]
+    init_s = [nodes_map[x] for x in nodes_map if x.startswith("I")][0]
+    number_to_change = visited[init_s]
+    visited[init_s] = 0
+    visited[s_to_change] = number_to_change
+    return init_s, visited, total_events, None
 
-eval_runs = 1000
+
+eval_runs = 100
 eval_run_max_length = 1000
 
 if len(sys.argv) > 1:
-    i = int(sys.argv[1])
+    i = sys.argv[1]
+    PER_BT = sys.argv[2] == "1"
 else:
     eval_runs = 10
-    eval_run_max_length = 100
-    i = 1
-map_settings["map"] = maps[i]
+    eval_run_max_length = 10
+    i = "map_7_8_2"
+    PER_BT = True
+
+def format_map(file_name):
+    l = []
+    with open("examples/tmp_maps/" + file_name, "r") as f:
+        for line in f:
+            l.append(line.strip("\n"))
+    return l
+
+map_settings["map"] = format_map(i)
 pygame_settings["display"] = False
-dfs = DFSBProgram(init_bprogram)
-(init, states_dict, events, liveness_bthreads), dfs_time = dfs.run()
-print("dfs_time:", dfs_time)
-save_obj(states_dict, "output/states_dict_" + str(i))
+
+with open("output/sokoban_cobp_" + str(i) + ".ser", "rb") as fd:
+    jobj = fd.read()
+    pobj = javaobj.loads(jobj)
+    init, states_dict, events, liveness_bthreads = transform_dict(pobj, PER_BT)
+
 states = list(states_dict)
-save_obj(states, "output/states_" + str(i))
 print("graph size:", len(states))
 print("graph edges:", sum([len(s.transitions) for s in states]))
-graph = DFSBProgram.save_graph(init, states, "output/graph_sokoban_" + str(i) + ".dot")
 
-spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthreads)
-#spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
+spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthreads, per_bthread=PER_BT)
+spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
 print("spot_time:", spot_time)
-#print("spot_success_rate:", spot_success_rate)
-save_obj(spot_ess, "output/spot_ess_" + str(i))
+print("spot_success_rate:", spot_success_rate)
 
-
-value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, 0.99, 0.01, liveness_bthreads, per_bthread=False)
+value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, 0.99, 0.01, per_bthread=PER_BT)
 print("value_iteration_time:", value_iteration_time)
 value_iteration_ess.spot_ess = spot_ess
 value_iteration_ess.spot_ess.reset_to_initial()
-value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
-                                                        eval_run_max_length)
-save_obj(value_iteration_ess, "output/value_iteration_ess_" + str(i))
+value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
 print("value_iteration_success_rate:", value_iteration_success_rate)
 
+import numpy as np
+value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, 0.99, 0.001, per_bthread=PER_BT)
+noises = [0.01, 0.02, 0.03, 0.04, 0.05]
+for noise in noises:
+    value_iteration_ess.spot_ess = spot_ess
+    value_iteration_ess.spot_ess.reset_to_initial()
+    value_iteration_ess.set_noise(lambda: np.random.normal(1, noise))
+    value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
+                                                           eval_run_max_length)
+    print("value_iteration_success_rate with noise", noise, ":", value_iteration_success_rate)
 
-
-
-
-# from examples.sokoban import init_bprogram, map_settings, pygame_settings
-# from dfs.dfs_bprogram import DFSBProgram
-# from algorithms.spot_solver import SpotSolver
-# from algorithms.value_iteration import ValueIteration
-# from algorithms.q_learning import *
-# from bp.bp_env import BPEnv
-# import pandas as pd
-# from examples.sokoban_pygame.sokoban_maps import maps
-#
-# eval_runs = 10
-# eval_run_max_length = 10
-# num_episodes = [1_000, 10_000, 10_000, 10_000]
-# episode_timeout = [100, 100, 100, 100]
-#
-#
-#
-# results = pd.DataFrame(columns=["map",
-#                                 "DFS time",
-#                                 "spot time",
-#                                 "spot success",
-#                                 "value iteration time",
-#                                 "value iteration success",
-#                                 # "qlearning time",
-#                                 # "qlearning success"
-#                                 ])
-#
-# for i in maps:
-#     if i > 2: break
-#     map_settings["map"] = maps[i]
-#     pygame_settings["display"] = False
-#     dfs = DFSBProgram(init_bprogram)
-#     (init, states_dict, events), dfs_time = dfs.run()
-#     states = list(states_dict)
-#     graph = DFSBProgram.save_graph(init, states, "output/_graph_sokoban_" + str(i) + ".dot")
-#
-#     spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events)
-#     spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
-#
-#
-#     value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, 0.99, 0.01)
-#     value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
-#                                                            eval_run_max_length)
-#
-#     # env = BPEnv()
-#     # env.set_bprogram_generator(init_bprogram)
-#     # (qlearning_ess, Q, q_results, episodes, mean_reward), qlearning_time = QLearning.compute_ess(env,
-#     #                                                                                              num_episodes[i],
-#     #                                                                                              0.1,
-#     #                                                                                              0.99,
-#     #                                                                                              False,
-#     #                                                                                              5,
-#     #                                                                                              glie_10,
-#     #                                                                                              episode_timeout[i])
-#     #
-#     # qlearning_success_rate = ValueIteration.evaluate(qlearning_ess, init_bprogram, eval_runs, eval_run_max_length)
-#
-#     results = results.append({"map": int(i),
-#                               "DFS time": dfs_time,
-#                               "spot time": spot_time,
-#                               "spot success": spot_success_rate,
-#                               "value iteration time": value_iteration_time,
-#                               "value iteration success": value_iteration_success_rate,
-#                               # "qlearning time": qlearning_time,
-#                               # "qlearning success": qlearning_success_rate
-#                               },
-#                              ignore_index=True)
-# results.to_csv("output/_sokoban_results.csv", index=False)

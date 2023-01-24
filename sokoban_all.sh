@@ -6,17 +6,15 @@
 #SBATCH --output sokoban_all.out ### output log for running job - %J is the job number variable
 #SBATCH --mail-user=tomya@post.bgu.ac.il ### users email for sending job status notifications replace with yours
 #SBATCH --mail-type=BEGIN,END,FAIL ### conditions when to send the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
-#SBATCH --mem=250G ### total amount of RAM
+#SBATCH --mem=100G ### total amount of RAM
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32 ##. // max 128
 
 ### Start you code below ####
 module load anaconda ### load anaconda module
 source activate BPLiveExecution
-for i in $(seq 10 15); do
-	for b in $(seq 1 2); do
-	  echo "map_${i}_${b}"
-		~/.conda/envs/BPLiveExecution/bin/python ~/repos/BPLiveExecution/main_sokoban_2.py "map_${i}_${b}"
-	done
+files=("map_10_8_2" "map_6_7_3" "map_10_7_2" )
+for file in "${files[@]}"; do
+  echo "$file"
+  ~/.conda/envs/BPLiveExecution/bin/python ~/repos/BPLiveExecution/main_sokoban.py "$file" "0"
 done
-

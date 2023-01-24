@@ -8,21 +8,17 @@ from scipy.sparse import csr_matrix
 class ValueIteration:
 
     @staticmethod
-    def compute_ess(states, states_dict, gamma, convergence_threshold, liveness_bthreads, per_bthread=True):
-        if not per_bthread:
+    def compute_ess(states, states_dict, gamma, convergence_threshold, per_bthread=True):
+        if per_bthread:
+            Q, t = ValueIteration.compute_Q_per_bthread(states, states_dict, gamma, convergence_threshold)
+            return QTableCompatibleESS(Q, per_bthread=True), t
+        else:
             Q, t = ValueIteration.compute_Q(states, states_dict, gamma, convergence_threshold)
             return QTableCompatibleESS(Q, per_bthread=False), t
-        num_of_bthreads = len(list(states[0].rewards.values())[0])
-        with ThreadPoolExecutor(num_of_bthreads) as executor:
-            processes = [executor.submit(ValueIteration.compute_Q_per_bthread, states, states_dict, gamma, convergence_threshold, i) if i in liveness_bthreads
-                         else executor.submit(ValueIteration.dummy_Q, states, i) for i in range(num_of_bthreads)]
-            Q = dict([(i, p.result()) for i,p in enumerate(processes)])
-            t = max([x[1] for x in Q.values()])
-            Q = dict([(k,v[0]) for k,v in Q.items()])
-        return QTableCompatibleESS(Q), t
+
 
     @staticmethod
-    def compute_Q_per_bthread(states, states_dict, gamma, convergence_threshold, bt_id):
+    def compute_Q_per_bthread(states, states_dict, gamma, convergence_threshold):
         states_dict_flipped = dict([(v, k) for k, v in states_dict.items()])
 
         actions = set()
@@ -35,15 +31,15 @@ class ValueIteration:
 
         transitions = []
         for i in range(len(actions)):
-            transitions.append(csr_matrix((S, S), dtype='uint8'))
+            transitions.append(csr_matrix((S, S), dtype=int))
         rewards = []
         for i in range(len(actions)):
-            rewards.append(csr_matrix((S, S), dtype='uint8'))
+            rewards.append(csr_matrix((S, S), dtype=int))
 
         for k, v in states_dict_flipped.items():
             for evt_i, evt in enumerate(actions):
                 if evt in v.rewards:
-                    rewards[evt_i][states_dict[v], states_dict[v.transitions[evt]]] = v.rewards[evt][bt_id]
+                    rewards[evt_i][states_dict[v], states_dict[v.transitions[evt]]] = v.rewards[evt]
                     transitions[evt_i][states_dict[v], states_dict[v.transitions[evt]]] = 1
                 else:
                     rewards[actions.index(evt)][states_dict[v], S-1] = -2
@@ -93,6 +89,7 @@ class ValueIteration:
     def evaluate(Q_ess: QTableCompatibleESS, init_bprogram, runs, run_max_length):
         bad_runs = 0
         for i in range(runs):
+            l=[] #debug
             bprogram = init_bprogram()
             bprogram.event_selection_strategy = Q_ess
             bprogram.setup()
@@ -104,7 +101,9 @@ class ValueIteration:
                 # Finish the program if no event is selected
                 if event is None:
                     bad_runs += 1
+                    print(l) #debug
                     break
+                l.append(event.name) #debug
                 prev_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
                 bprogram.advance_bthreads(event)
                 next_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
