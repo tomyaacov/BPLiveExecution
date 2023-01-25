@@ -79,7 +79,6 @@ spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthre
 #spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
 print("spot_time:", spot_time)
 #print("spot_success_rate:", spot_success_rate)
-raise ValueError
 
 value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, events, 0.99, 0.01, per_bthread=PER_BT)
 print("value_iteration_time:", value_iteration_time)
