@@ -61,7 +61,7 @@ class SpotSolver:
         game.new_states(len(states_dict))
         for s1, id1 in states_dict.items():
             for e, s2 in s1.transitions.items():
-                l = [i for i in range(len(s1.must_finish)) if s1.must_finish[i]]
+                l = [i for i in range(len(s2.must_finish)) if not s2.must_finish[i]]
                 game.new_edge(id1, states_dict[s2], dict_bdd[e], l)
 
         game.set_init_state(0)
@@ -76,10 +76,6 @@ class SpotSolver:
         for i, b in enumerate(spot.get_state_winners(p_game)):
             state_liveness[i] = b
         return state_liveness
-    @staticmethod
-    def dummy_state_liveness(states_dict, i):
-        return dict([(i, True) for n, i in states_dict.items()])
-
 
     @staticmethod
     def evaluate(spot_ess: SpotESS, init_bprogram, runs, run_max_length):
