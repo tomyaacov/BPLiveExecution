@@ -1,10 +1,11 @@
-from examples.sokoban import init_bprogram, map_settings, pygame_settings
+from examples.sokoban_new import init_bprogram, map_settings, pygame_settings
 from algorithms.spot_solver import SpotSolver
 from algorithms.value_iteration import ValueIteration
 from examples.sokoban_pygame.sokoban_maps import maps
 import sys
 import javaobj
 from dfs.dfs_node import DFSNode
+
 
 def transform_dict(d, per_bthread):
     visited = {}
@@ -53,11 +54,11 @@ else:
     eval_runs = 10
     eval_run_max_length = 100
     i = "map_6_8_3"
-    PER_BT = True
+    PER_BT = False
 
 def format_map(file_name):
     l = []
-    with open("examples/tmp_maps/" + file_name, "r") as f:
+    with open("examples/maps/" + file_name, "r") as f:
         for line in f:
             l.append(line.strip("\n"))
     return l
@@ -79,7 +80,7 @@ spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthre
 print("spot_time:", spot_time)
 #print("spot_success_rate:", spot_success_rate)
 
-value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, 0.99, 0.01, per_bthread=PER_BT)
+value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, events, 0.99, 0.01, per_bthread=PER_BT)
 print("value_iteration_time:", value_iteration_time)
 value_iteration_ess.spot_ess = spot_ess
 value_iteration_ess.spot_ess.reset_to_initial()
@@ -87,12 +88,12 @@ value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init
 print("value_iteration_success_rate:", value_iteration_success_rate)
 
 import numpy as np
-value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, 0.99, 0.001, per_bthread=PER_BT)
+value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, events, 0.999, 0.0001, per_bthread=PER_BT)
 noises = [0.01, 0.02, 0.03, 0.04, 0.05]
 for noise in noises:
     value_iteration_ess.spot_ess = spot_ess
     value_iteration_ess.spot_ess.reset_to_initial()
-    value_iteration_ess.set_noise(lambda: np.random.normal(1, noise))
+    value_iteration_ess.set_noise(lambda: np.random.normal(0, noise))
     value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
                                                            eval_run_max_length)
     print("value_iteration_success_rate with noise", noise, ":", value_iteration_success_rate)

@@ -10,6 +10,9 @@ class SpotESS(SimpleEventSelectionStrategy):
         self.state_liveness = state_liveness
         self.current_state = self.states_dict_flip[0]
 
+    def get_copy(self):
+        return SpotESS(self.states_dict, self.state_liveness)
+
     def remove_dead_states(self, selectable_events):
         final_events = []
         selectable_events = list(selectable_events)

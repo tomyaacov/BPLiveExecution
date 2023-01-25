@@ -6,12 +6,19 @@ class QTableCompatibleESS(SimpleEventSelectionStrategy):
         self.per_bthread = per_bthread
         self.Q = Q
         self.spot_ess = spot_ess
-        self.noise = self.set_noise(lambda:  0)
+        self.noise = {}
         if self.per_bthread:
             self.reward_sums = 0
         else:
             self.reward_sums = 0
         super().__init__()
+
+    def get_copy(self):
+        spot_ess = self.spot_ess.get_copy()
+        obj = QTableCompatibleESS(self.Q, spot_ess, self.per_bthread)
+        obj.noise = self.noise
+        return obj
+
 
     def select(self, statements, prev_must_finish, next_must_finish, s_t):
         self.reward_sums += self.reward(prev_must_finish, next_must_finish)
@@ -20,7 +27,7 @@ class QTableCompatibleESS(SimpleEventSelectionStrategy):
             self.reset_to_initial()
             return None
         if s_t in self.Q:
-            choices = [x for x in selectable_events if self.Q[s_t][x.name] + self.noise[s_t][x.name] + self.reward_sums > -1]
+            choices = [x for x in selectable_events if self.Q[s_t][x.name] + self.noise.get(s_t, {}).get(x.name, 0) + self.reward_sums > -0.5]
             try:
                 a_t = random.choice(choices)
             except IndexError:
@@ -47,10 +54,9 @@ class QTableCompatibleESS(SimpleEventSelectionStrategy):
             return int(not any(next_must_finish)) - int(not any(prev_must_finish))
 
     def set_noise(self, f):
-        noise_Q = {}
-        for s,v in self.Q.items():
-            noise_Q[s] = {}
+        self.noise = {}
+        for s, v in self.Q.items():
+            self.noise[s] = {}
             for a, _ in v.items():
-                noise_Q[s][a] = f()
-        return noise_Q
+                self.noise[s][a] = f()
 

@@ -5,27 +5,22 @@ import numpy as np
 import mdptoolbox
 from scipy.sparse import csr_matrix
 
+
 class ValueIteration:
 
     @staticmethod
-    def compute_ess(states, states_dict, gamma, convergence_threshold, per_bthread=True):
+    def compute_ess(states, states_dict, actions, gamma, convergence_threshold, per_bthread=True):
         if per_bthread:
-            Q, t = ValueIteration.compute_Q_per_bthread(states, states_dict, gamma, convergence_threshold)
+            Q, t = ValueIteration.compute_Q_per_bthread(states, states_dict, list(actions), gamma, convergence_threshold)
             return QTableCompatibleESS(Q, per_bthread=True), t
         else:
-            Q, t = ValueIteration.compute_Q(states, states_dict, gamma, convergence_threshold)
+            Q, t = ValueIteration.compute_Q(states, states_dict, list(actions), gamma, convergence_threshold)
             return QTableCompatibleESS(Q, per_bthread=False), t
 
 
     @staticmethod
-    def compute_Q_per_bthread(states, states_dict, gamma, convergence_threshold):
+    def compute_Q_per_bthread(states, states_dict, actions, gamma, convergence_threshold):
         states_dict_flipped = dict([(v, k) for k, v in states_dict.items()])
-
-        actions = set()
-        for k in states_dict:
-            for evt in k.transitions:
-                actions.add(evt)
-        actions = list(actions)
 
         S = len(states_dict_flipped) + 1
 
@@ -86,40 +81,63 @@ class ValueIteration:
         return Q, 0
 
     @staticmethod
-    def evaluate(Q_ess: QTableCompatibleESS, init_bprogram, runs, run_max_length):
-        bad_runs = 0
-        for i in range(runs):
-            #l=[] #debug
-            bprogram = init_bprogram()
-            bprogram.event_selection_strategy = Q_ess
-            bprogram.setup()
-            s = "_".join([str(x.get('state', 'D')) for x in bprogram.tickets])
+    def evaluate_single(Q_ess: QTableCompatibleESS, init_bprogram, run_max_length):
+        bprogram = init_bprogram()
+        bprogram.event_selection_strategy = Q_ess.get_copy()
+        bprogram.setup()
+        s = "_".join([str(x.get('state', 'D')) for x in bprogram.tickets])
+        prev_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
+        next_must_finish = prev_must_finish
+        for j in range(run_max_length):
+            event = bprogram.event_selection_strategy.select(bprogram.tickets, prev_must_finish, next_must_finish, s)
+            # Finish the program if no event is selected
+            if event is None:
+                return 1
+            # l.append(event.name) #debug
             prev_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
-            next_must_finish = prev_must_finish
-            for j in range(run_max_length):
-                event = bprogram.event_selection_strategy.select(bprogram.tickets, prev_must_finish, next_must_finish, s)
-                # Finish the program if no event is selected
-                if event is None:
-                    bad_runs += 1
-                    #print(l) #debug
-                    break
-                #l.append(event.name) #debug
-                prev_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
-                bprogram.advance_bthreads(event)
-                next_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
-                s = "_".join([str(x.get('state', 'D')) for x in bprogram.tickets])
-            Q_ess.reset_to_initial()
-        return (runs - bad_runs) / runs
+            bprogram.advance_bthreads(event)
+            next_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
+            s = "_".join([str(x.get('state', 'D')) for x in bprogram.tickets])
+        Q_ess.reset_to_initial()
+        return 0
 
     @staticmethod
-    def compute_Q(states, states_dict, gamma, convergence_threshold):
-        states_dict_flipped = dict([(v, k) for k, v in states_dict.items()])
+    def evaluate(Q_ess: QTableCompatibleESS, init_bprogram, runs, run_max_length):
+        with ThreadPoolExecutor(1) as executor:
+            processes = [executor.submit(ValueIteration.evaluate_single, Q_ess, init_bprogram, run_max_length) for i in
+                         range(runs)]
+            results = [p.result() for p in processes]
+        return (runs - sum(results)) / runs
 
-        actions = set()
-        for k in states_dict:
-            for evt in k.transitions:
-                actions.add(evt)
-        actions = list(actions)
+    # @staticmethod
+    # def evaluate(Q_ess: QTableCompatibleESS, init_bprogram, runs, run_max_length):
+    #     bad_runs = 0
+    #     for i in range(runs):
+    #         #l=[] #debug
+    #         bprogram = init_bprogram()
+    #         bprogram.event_selection_strategy = Q_ess
+    #         bprogram.setup()
+    #         s = "_".join([str(x.get('state', 'D')) for x in bprogram.tickets])
+    #         prev_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
+    #         next_must_finish = prev_must_finish
+    #         for j in range(run_max_length):
+    #             event = bprogram.event_selection_strategy.select(bprogram.tickets, prev_must_finish, next_must_finish, s)
+    #             # Finish the program if no event is selected
+    #             if event is None:
+    #                 bad_runs += 1
+    #                 #print(l) #debug
+    #                 break
+    #             #l.append(event.name) #debug
+    #             prev_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
+    #             bprogram.advance_bthreads(event)
+    #             next_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
+    #             s = "_".join([str(x.get('state', 'D')) for x in bprogram.tickets])
+    #         Q_ess.reset_to_initial()
+    #     return (runs - bad_runs) / runs
+
+    @staticmethod
+    def compute_Q(states, states_dict, actions, gamma, convergence_threshold):
+        states_dict_flipped = dict([(v, k) for k, v in states_dict.items()])
 
         S = len(states_dict_flipped) + 1
 
