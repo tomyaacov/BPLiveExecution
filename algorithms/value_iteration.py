@@ -89,7 +89,7 @@ class ValueIteration:
     def evaluate(Q_ess: QTableCompatibleESS, init_bprogram, runs, run_max_length):
         bad_runs = 0
         for i in range(runs):
-            l=[] #debug
+            #l=[] #debug
             bprogram = init_bprogram()
             bprogram.event_selection_strategy = Q_ess
             bprogram.setup()
@@ -101,9 +101,9 @@ class ValueIteration:
                 # Finish the program if no event is selected
                 if event is None:
                     bad_runs += 1
-                    print(l) #debug
+                    #print(l) #debug
                     break
-                l.append(event.name) #debug
+                #l.append(event.name) #debug
                 prev_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]
                 bprogram.advance_bthreads(event)
                 next_must_finish = [x.get('must_finish', False) for x in bprogram.tickets]

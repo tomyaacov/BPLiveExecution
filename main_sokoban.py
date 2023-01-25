@@ -51,9 +51,9 @@ if len(sys.argv) > 1:
     PER_BT = sys.argv[2] == "1"
 else:
     eval_runs = 10
-    eval_run_max_length = 10
-    i = "map_7_8_2"
-    PER_BT = True
+    eval_run_max_length = 100
+    i = "map_13_12_1"
+    PER_BT = False
 
 def format_map(file_name):
     l = []
@@ -65,7 +65,7 @@ def format_map(file_name):
 map_settings["map"] = format_map(i)
 pygame_settings["display"] = False
 
-with open("output/sokoban_cobp_" + str(i) + ".ser", "rb") as fd:
+with open("examples/graph_objects/sokoban_cobp_" + str(i) + ".ser", "rb") as fd:
     jobj = fd.read()
     pobj = javaobj.loads(jobj)
     init, states_dict, events, liveness_bthreads = transform_dict(pobj, PER_BT)
@@ -75,9 +75,9 @@ print("graph size:", len(states))
 print("graph edges:", sum([len(s.transitions) for s in states]))
 
 spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthreads, per_bthread=PER_BT)
-spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
+#spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
 print("spot_time:", spot_time)
-print("spot_success_rate:", spot_success_rate)
+#print("spot_success_rate:", spot_success_rate)
 
 value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, 0.99, 0.01, per_bthread=PER_BT)
 print("value_iteration_time:", value_iteration_time)
