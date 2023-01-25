@@ -103,7 +103,7 @@ class ValueIteration:
 
     @staticmethod
     def evaluate(Q_ess: QTableCompatibleESS, init_bprogram, runs, run_max_length):
-        with ThreadPoolExecutor(1) as executor:
+        with ThreadPoolExecutor(50) as executor:
             processes = [executor.submit(ValueIteration.evaluate_single, Q_ess, init_bprogram, run_max_length) for i in
                          range(runs)]
             results = [p.result() for p in processes]
