@@ -53,7 +53,7 @@ if len(sys.argv) > 1:
 else:
     eval_runs = 100
     eval_run_max_length = 100
-    i = "map_6_8_3"
+    i = "map_13_12_1"
     PER_BT = True
 
 def format_map(file_name):

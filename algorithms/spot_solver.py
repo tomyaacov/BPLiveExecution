@@ -109,7 +109,10 @@ class SpotSolver:
     @timer
     def run_alg_per_bt(game, states):
         p_game = spot.partial_degeneralize(game)
-        spot.set_state_players(p_game, [True] * len(p_game.get_original_states()))
+        try:
+            spot.set_state_players(p_game, [True] * len(p_game.get_original_states()))
+        except Exception:
+            spot.set_state_players(p_game, [True] * len(states))
         spot.solve_game(p_game)
         # p_game = spot.parity_type_to_parity(game)
         # if p_game is None:
