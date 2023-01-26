@@ -97,7 +97,7 @@ print("value_iteration_success_rate:", value_iteration_success_rate)
 
 import numpy as np
 value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, events, 0.999, 0.0001, per_bthread=PER_BT)
-noises = [0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6]
+noises = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
 for noise in noises:
     value_iteration_ess.spot_ess = spot_ess
     value_iteration_ess.spot_ess.reset_to_initial()

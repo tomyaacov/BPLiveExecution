@@ -73,8 +73,9 @@ class SpotSolver:
 
 
         state_liveness = {}
+        orig = list(p_game.get_original_states())
         for i, b in enumerate(spot.get_state_winners(p_game)):
-            state_liveness[i] = b
+            state_liveness[orig[i]] = b
         return state_liveness
 
     @staticmethod
@@ -107,11 +108,14 @@ class SpotSolver:
     @staticmethod
     @timer
     def run_alg_per_bt(game, states):
-        p_game = spot.parity_type_to_parity(game)
-        if p_game is None:
-            pass
-        spot.set_state_players(p_game, [True] * len(states))
-        spot.solve_parity_game(p_game)
+        p_game = spot.partial_degeneralize(game)
+        spot.set_state_players(p_game, [True] * len(p_game.get_original_states()))
+        spot.solve_game(p_game)
+        # p_game = spot.parity_type_to_parity(game)
+        # if p_game is None:
+        #     pass
+        # spot.set_state_players(p_game, [True] * len(states))
+        # spot.solve_parity_game(p_game)
         return p_game
 
 
