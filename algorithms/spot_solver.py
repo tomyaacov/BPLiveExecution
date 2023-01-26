@@ -73,7 +73,10 @@ class SpotSolver:
 
 
         state_liveness = {}
-        orig = list(p_game.get_original_states())
+        try:
+            orig = list(p_game.get_original_states())
+        except Exception:
+            orig = list(range(len(spot.get_state_winners(p_game))))
         for i, b in enumerate(spot.get_state_winners(p_game)):
             state_liveness[orig[i]] = b
         return state_liveness
