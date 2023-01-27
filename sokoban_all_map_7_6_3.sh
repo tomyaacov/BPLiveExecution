@@ -6,7 +6,7 @@
 #SBATCH --output 0_map_7_6_3.out ### output log for running job - %J is the job number variable
 #SBATCH --mail-user=tomya@post.bgu.ac.il ### users email for sending job status notifications replace with yours
 #SBATCH --mail-type=BEGIN,END,FAIL ### conditions when to send the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
-#SBATCH --mem=100G ### total amount of RAM
+#SBATCH --mem=150G ### total amount of RAM
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32 ##. // max 128
 
