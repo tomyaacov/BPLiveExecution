@@ -44,7 +44,7 @@ def transform_dict(d, per_bthread):
     return init_s, visited, total_events, None
 
 
-eval_runs = 100
+eval_runs = 1000
 eval_run_max_length = 1000
 
 if len(sys.argv) > 1:
@@ -84,7 +84,7 @@ value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states,
                                                                        states_dict,
                                                                        events,
                                                                        0.99,
-                                                                       0.01 if PER_BT else 0.1,
+                                                                       0.05 if PER_BT else 0.1,
                                                                        per_bthread=PER_BT)
 print("value_iteration_time:", value_iteration_time)
 
@@ -97,7 +97,7 @@ print("value_iteration_success_rate:", value_iteration_success_rate)
 
 import numpy as np
 value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, events, 0.999, 0.0001, per_bthread=PER_BT)
-noises = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
+noises = [0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2]
 for noise in noises:
     value_iteration_ess.spot_ess = spot_ess
     value_iteration_ess.spot_ess.reset_to_initial()
