@@ -44,8 +44,8 @@ def transform_dict(d, per_bthread):
     return init_s, visited, total_events, None
 
 
-eval_runs = 1000
-eval_run_max_length = 1000
+eval_runs = 500
+eval_run_max_length = 500
 
 if len(sys.argv) > 1:
     i = sys.argv[1]
