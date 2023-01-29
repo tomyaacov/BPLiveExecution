@@ -80,13 +80,13 @@ spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthre
 print("spot_time:", spot_time)
 #print("spot_success_rate:", spot_success_rate)
 
-value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states,
-                                                                       states_dict,
-                                                                       events,
-                                                                       0.99,
-                                                                       0.05 if PER_BT else 0.1,
-                                                                       per_bthread=PER_BT)
-print("value_iteration_time:", value_iteration_time)
+# value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states,
+#                                                                        states_dict,
+#                                                                        events,
+#                                                                        0.99,
+#                                                                        0.05 if PER_BT else 0.1,
+#                                                                        per_bthread=PER_BT)
+# print("value_iteration_time:", value_iteration_time)
 
 
 
@@ -94,15 +94,19 @@ print("value_iteration_time:", value_iteration_time)
 # value_iteration_ess.spot_ess.reset_to_initial()
 # value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
 # print("value_iteration_success_rate:", value_iteration_success_rate)
-#
-# import numpy as np
-# value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, events, 0.999, 0.0001, per_bthread=PER_BT)
-# noises = [0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2]
-# for noise in noises:
-#     value_iteration_ess.spot_ess = spot_ess
-#     value_iteration_ess.spot_ess.reset_to_initial()
-#     value_iteration_ess.set_noise(lambda: np.random.normal(0, noise))
-#     value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
-#                                                            eval_run_max_length)
-#     print("value_iteration_success_rate with noise", noise, ":", value_iteration_success_rate)
+
+import numpy as np
+value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, events, 0.999, 0.0001, per_bthread=PER_BT)
+value_iteration_ess.spot_ess = spot_ess
+value_iteration_ess.spot_ess.reset_to_initial()
+value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
+print("value_iteration_success_rate:", value_iteration_success_rate)
+noises = [0.025, 0.05, 0.075, 0.1, 0.125, 0.15]
+for noise in noises:
+    value_iteration_ess.spot_ess = spot_ess
+    value_iteration_ess.spot_ess.reset_to_initial()
+    value_iteration_ess.set_noise(lambda: np.random.normal(0, noise))
+    value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs,
+                                                           eval_run_max_length)
+    print("value_iteration_success_rate with noise", noise, ":", value_iteration_success_rate)
 
