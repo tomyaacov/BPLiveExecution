@@ -101,7 +101,7 @@ value_iteration_ess.spot_ess = spot_ess
 value_iteration_ess.spot_ess.reset_to_initial()
 value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
 print("value_iteration_success_rate:", value_iteration_success_rate)
-noises = [0.025, 0.05, 0.075, 0.1, 0.125, 0.15]
+noises = [0.175, 0.2]
 for noise in noises:
     value_iteration_ess.spot_ess = spot_ess
     value_iteration_ess.spot_ess.reset_to_initial()
