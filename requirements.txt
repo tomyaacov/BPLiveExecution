@@ -19,6 +19,7 @@ cffi=1.15.1=py37h6c40b1e_2
 charset-normalizer=2.0.4=pyhd3eb1b0_0
 cloudpickle=1.6.0=pypi_0
 cryptography=38.0.1=py37hf6deb26_0
+cvxopt=1.3.0=pypi_0
 debugpy=1.5.1=py37he9d5cce_0
 decorator=5.1.1=pyhd3eb1b0_0
 defusedxml=0.7.1=pyhd3eb1b0_0
@@ -55,6 +56,7 @@ ipykernel=6.15.2=py37hecd8cb5_0
 ipython=7.31.1=py37hecd8cb5_1
 ipython_genutils=0.2.0=pyhd3eb1b0_1
 ipywidgets=7.6.5=pyhd3eb1b0_1
+javaobj-py3=0.4.3=pypi_0
 jedi=0.18.1=py37hecd8cb5_1
 jinja2=3.1.2=py37hecd8cb5_0
 jpeg=9e=hac89ed1_2
@@ -99,6 +101,7 @@ nbconvert=6.5.4=py37hecd8cb5_0
 nbformat=5.5.0=py37hecd8cb5_0
 ncurses=6.3=hca72f7f_3
 nest-asyncio=1.5.5=py37hecd8cb5_0
+networkx=2.6.3=pypi_0
 notebook=6.5.2=py37hecd8cb5_0
 notebook-shim=0.2.2=py37hecd8cb5_0
 nspr=4.33=he9d5cce_0
@@ -123,9 +126,11 @@ prompt_toolkit=3.0.20=hd3eb1b0_0
 psutil=5.9.0=py37hca72f7f_0
 ptyprocess=0.7.0=pyhd3eb1b0_2
 pycparser=2.21=pyhd3eb1b0_0
+pydot=1.4.2=pypi_0
 pygame=2.1.2=pypi_0
 pyglet=1.5.0=pypi_0
 pygments=2.11.2=pyhd3eb1b0_0
+pymdptoolbox=4.0b3=pypi_0
 pyopenssl=22.0.0=pyhd3eb1b0_0
 pyparsing=3.0.9=py37hecd8cb5_0
 pyqt=5.15.7=py37he9d5cce_0

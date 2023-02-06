@@ -220,11 +220,3 @@ def gym_env_generator(episode_timeout):
     env.episode_timeout = episode_timeout
     return env
 
-
-if __name__ == "__main__":
-    from examples.sokoban_pygame.sokoban_maps import maps
-    map_settings["map"] = maps[2]
-    pygame_settings["display"] = True
-    bprogram = init_bprogram()
-    bprogram.listener = PrintBProgramRunnerListener()
-    bprogram.run()

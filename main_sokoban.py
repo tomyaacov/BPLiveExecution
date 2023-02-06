@@ -1,7 +1,6 @@
 from examples.sokoban_new import init_bprogram, map_settings, pygame_settings
 from algorithms.spot_solver import SpotSolver
 from algorithms.value_iteration import ValueIteration
-from examples.sokoban_pygame.sokoban_maps import maps
 import sys
 import javaobj
 from dfs.dfs_node import DFSNode
@@ -44,8 +43,8 @@ def transform_dict(d, per_bthread):
     return init_s, visited, total_events, None
 
 
-eval_runs = 500
-eval_run_max_length = 500
+eval_runs = 1000
+eval_run_max_length = 1000
 
 if len(sys.argv) > 1:
     i = sys.argv[1]
@@ -76,24 +75,22 @@ print("graph size:", len(states))
 print("graph edges:", sum([len(s.transitions) for s in states]))
 
 spot_ess, spot_time = SpotSolver.compute_ess(states_dict, events, liveness_bthreads, per_bthread=PER_BT)
-#spot_success_rate = SpotSolver.evaluate(spot_ess, init_bprogram, eval_runs, eval_run_max_length)
 print("spot_time:", spot_time)
-#print("spot_success_rate:", spot_success_rate)
 
-# value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states,
-#                                                                        states_dict,
-#                                                                        events,
-#                                                                        0.99,
-#                                                                        0.05 if PER_BT else 0.1,
-#                                                                        per_bthread=PER_BT)
-# print("value_iteration_time:", value_iteration_time)
-
+value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states,
+                                                                       states_dict,
+                                                                       events,
+                                                                       0.99,
+                                                                       0.05 if PER_BT else 0.1,
+                                                                       per_bthread=PER_BT)
+print("value_iteration_time:", value_iteration_time)
 
 
-# value_iteration_ess.spot_ess = spot_ess
-# value_iteration_ess.spot_ess.reset_to_initial()
-# value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
-# print("value_iteration_success_rate:", value_iteration_success_rate)
+
+value_iteration_ess.spot_ess = spot_ess
+value_iteration_ess.spot_ess.reset_to_initial()
+value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
+print("value_iteration_success_rate:", value_iteration_success_rate)
 
 import numpy as np
 value_iteration_ess, value_iteration_time = ValueIteration.compute_ess(states, states_dict, events, 0.999, 0.0001, per_bthread=PER_BT)
@@ -101,7 +98,7 @@ value_iteration_ess.spot_ess = spot_ess
 value_iteration_ess.spot_ess.reset_to_initial()
 value_iteration_success_rate = ValueIteration.evaluate(value_iteration_ess, init_bprogram, eval_runs, eval_run_max_length)
 print("value_iteration_success_rate:", value_iteration_success_rate)
-noises = [0.175, 0.2]
+noises = [0.1, 0.125, 0.15, 0.175, 0.2]
 for noise in noises:
     value_iteration_ess.spot_ess = spot_ess
     value_iteration_ess.spot_ess.reset_to_initial()
